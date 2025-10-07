@@ -5,21 +5,29 @@ import java.util.Objects;
 public class Producte {
 
     // Atributos
-    private int codigo = -1;
-    private boolean descatalogado = false;
-    private String nombre;
-    private double precio;
-    private int stock;
+    private int codigo = -1;                // 4 bytes
+    private String nombre;                  // 50 carácteres (50 * 2 = 100 bytes)
+    private double precio;                  // 8 bytes
+    private int stock;                      // 4 bytes
+    private boolean descatalogado = false;  // 1 byte
+    // En total, un registro ocupa 67 bytes
 
     // Constructores
     public Producte() {}
 
-    public Producte(String nombre, double precio, int stock,
-                    boolean descatalogado) {
-        this.descatalogado = descatalogado;
+    public Producte(String nombre, double precio, int stock, boolean descatalogado) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
+        this.descatalogado = descatalogado;
+    }
+
+    public Producte(int codigo, String nombre, double precio, int stock, boolean descatalogado) {
+        this.codigo = codigo;
+        this.nombre = nombre;
+        this.precio = precio;
+        this.stock = stock;
+        this.descatalogado = descatalogado;
     }
 
     // Getters y Setters
