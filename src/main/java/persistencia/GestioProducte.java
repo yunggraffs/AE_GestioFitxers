@@ -5,6 +5,7 @@ import model.Producte;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GestioProducte implements Gestionable {
 
@@ -71,9 +72,39 @@ public class GestioProducte implements Gestionable {
             throw new ProducteNoValidException("Código no válido.");
         }
 
-        // Aprovechamos que el atributo codigo es único y secuencial para posicionarnos directamente en ese registro
-        try {
-            p = leerProducto(new RandomAccessFile(rutaProductos, "r"), codigo - 1);
+        /*
+        Sabiendo el tamaño en bytes de cada registro, recorremos de código en código hasta que coincida, comenzando
+        desde la posición 0 y sumando el tamaño del registro en cada iteración.
+         */
+        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            int codigoRegistro;
+
+            for (int i = 0; i < rutaProductos.length(); i += tamanoRegistro) {
+                // Posicionar el pointer, recoger el código y comprobar si es el que buscamos
+                raf.seek(i);
+                codigoRegistro = raf.readInt();
+                if (codigoRegistro == codigo) {
+
+                }
+
+            }
+            // Se posiciona en la posición deseada
+            file.seek(posicion * tamanoRegistro);
+
+            // Se escribe el nuevo registro
+            file.writeInt(p.getCodigo());
+
+            char[] nombreChar = p.getNombre().toCharArray();
+            for (char letra : nombreChar) {
+                file.writeChar(letra);
+            }
+
+            file.writeDouble(p.getPrecio());
+            file.writeInt(p.getStock());
+            file.writeBoolean(p.isDescatalogado());
+
+            file.close();
+            System.out.println("Producto añadido con éxito.");
 
         } catch (EOFException e) {
             throw new ProducteNoExistentException(
@@ -148,6 +179,11 @@ public class GestioProducte implements Gestionable {
 
 
 
+    private Producte leerProducto(RandomAccessFile raf, int posicion) {
+        int codigo = raf.readInt();
+
+    }
+
     private void validarDatos(Producte p) throws ProducteNoValidException {
 
         // Nombre
@@ -168,58 +204,6 @@ public class GestioProducte implements Gestionable {
         // Stock
         if (p.getStock() < 0) {
             throw new ProducteNoValidException("Stock inferior a 0.");
-        }
-    }
-
-    private Producte leerProducto(RandomAccessFile file, int posicion) throws IOException {
-        // Posicionarnos en el registro deseado
-        file.seek(posicion * tamanoRegistro);
-
-        // Extraer todos los atributos del registro
-        int codigo = file.readInt();
-
-        char[] nombreChars = new char[50];
-        for (int i = 0; i < nombreChars.length; i++) {
-            nombreChars[i] = file.readChar();
-        }
-        String nombre = new String(nombreChars);
-        double precio = file.readDouble();
-        int stock = file.readInt();
-        boolean descatalogado = file.readBoolean();
-        file.close();
-
-        return new Producte(codigo, nombre, precio, stock, descatalogado);
-    }
-
-    private void escribirProducto(RandomAccessFile file, Producte p, int posicion) throws IOException {
-        // Se posiciona en la posición deseada
-        file.seek(posicion * tamanoRegistro);
-
-        // Se escribe el nuevo registro
-        file.writeInt(p.getCodigo());
-
-        char[] nombreChar = p.getNombre().toCharArray();
-        for (char letra : nombreChar) {
-            file.writeChar(letra);
-        }
-
-        file.writeDouble(p.getPrecio());
-        file.writeInt(p.getStock());
-        file.writeBoolean(p.isDescatalogado());
-
-        file.close();
-        System.out.println("Producto añadido con éxito.");
-    }
-
-    //==============================================
-    public void leerFicheroCompleto() {
-        try (FileInputStream fis = new FileInputStream(rutaProductos)) {
-            int b;
-            while ((b = fis.read()) != -1) {
-                System.out.print(b);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

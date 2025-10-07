@@ -6,11 +6,11 @@ public class Producte {
 
     // Atributos
     private int codigo = -1;                // 4 bytes
-    private String nombre;                  // 50 carácteres (50 * 2 = 100 bytes)
+    private String nombre;                  // 52 bytes (2 bytes + (1 byte * carácter))
     private double precio;                  // 8 bytes
     private int stock;                      // 4 bytes
     private boolean descatalogado = false;  // 1 byte
-    // En total, un registro ocupa 67 bytes
+    // En total, un registro ocupa 69 bytes
 
     // Constructores
     public Producte() {}
