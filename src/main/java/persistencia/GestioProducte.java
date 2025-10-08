@@ -13,7 +13,7 @@ public class GestioProducte implements Gestionable {
     private final File rutaProductos;
     private final File rutaSinStock;
     private final File rutaDescatalogado;
-    private final int tamanoRegistro = 67;
+    private final int tamanoRegistro = 69;
 
     // Constructor
     public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado) {
@@ -31,24 +31,27 @@ public class GestioProducte implements Gestionable {
 
         // Generar código para el producto cogiendo el último código + 1
         int totalRegistros = (int) (rutaProductos.length() / tamanoRegistro);
-        Producte ultimoRegistro;
-        try {
-            ultimoRegistro = leerProducto(new RandomAccessFile(rutaProductos, "r"), totalRegistros);
-            codigoGenerado = ultimoRegistro.getCodigo() + 1;
 
-        } catch (EOFException e) {
-            // Únicamente atrapará EOFException cuando el fichero esté vacío
+        // En caso de que el total de registros sea 0 se asigna directamente el código 1
+        if (totalRegistros == 0) {
             codigoGenerado = 1;
 
-        } catch (IOException e) {
-            System.err.println("Error! " + e.getMessage());
-            return -1;
+        } else {
+            try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+                Producte ultimoRegistro = leerProducto(raf, totalRegistros - 1);
+                codigoGenerado = ultimoRegistro.getCodigo() + 1;
+
+            } catch (IOException e) {
+                System.err.println("Error! " + e.getMessage());
+                return -1;
+            }
         }
 
         // Añadir el nuevo producto a productos.bin
         p.setCodigo(codigoGenerado);
-        try {
-            escribirProducto(new RandomAccessFile(rutaProductos, "rw"), p, totalRegistros);
+        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "rw")){
+            escribirProducto(raf, p);
+            System.out.printf("[%d] %s añadido correctamente.\n", p.getCodigo(), p.getNombre().strip());
 
         } catch (FileNotFoundException e) {
             System.err.println("Error! No se ha podido encontrar el archivo \"" +
@@ -65,7 +68,7 @@ public class GestioProducte implements Gestionable {
 
     @Override
     public Producte cercaPerCodi(int codigo) throws ProducteNoValidException, ProducteNoExistentException {
-        Producte p;
+        Producte p = null;
 
         // Validamos el código
         if (codigo < 1) {
@@ -74,45 +77,37 @@ public class GestioProducte implements Gestionable {
 
         /*
         Sabiendo el tamaño en bytes de cada registro, recorremos de código en código hasta que coincida, comenzando
-        desde la posición 0 y sumando el tamaño del registro en cada iteración.
+        desde la posición 0 y sumando el tamaño del registro en cada iteración. En el momento que encontremos un
+        código coincidente, llamaremos al metodo leerProducto() indicandole la posición inicial, en este caso la misma
+        del código. Debido a que el código es un campo con valores únicos, en caso de encontrar un código coincidente
+        hacemos un break para dejar de iterar. Como la instancia de RandomAccessFile está en el try-with-resources se
+        cerrará de manera automática.
          */
         try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            int posCodigo = 0;
             int codigoRegistro;
 
-            for (int i = 0; i < rutaProductos.length(); i += tamanoRegistro) {
+            // Iteramos de código en código
+            for (int i = posCodigo; i <= raf.length(); i += tamanoRegistro) {
                 // Posicionar el pointer, recoger el código y comprobar si es el que buscamos
                 raf.seek(i);
                 codigoRegistro = raf.readInt();
+
+                // Si encontramos el código coincidente, leemos el producto completo
                 if (codigoRegistro == codigo) {
-
+                    p = leerProducto(raf, (i / tamanoRegistro));
+                    break;
                 }
-
-            }
-            // Se posiciona en la posición deseada
-            file.seek(posicion * tamanoRegistro);
-
-            // Se escribe el nuevo registro
-            file.writeInt(p.getCodigo());
-
-            char[] nombreChar = p.getNombre().toCharArray();
-            for (char letra : nombreChar) {
-                file.writeChar(letra);
             }
 
-            file.writeDouble(p.getPrecio());
-            file.writeInt(p.getStock());
-            file.writeBoolean(p.isDescatalogado());
-
-            file.close();
-            System.out.println("Producto añadido con éxito.");
-
+        // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
         } catch (EOFException e) {
             throw new ProducteNoExistentException(
                     "No existe ningún producto registrado con el código \'" + codigo + "\'.");
 
         } catch (IOException e) {
             System.err.println("Error! " + e.getMessage());
-            return null;
+            return p;
         }
 
         return p;
@@ -120,21 +115,40 @@ public class GestioProducte implements Gestionable {
 
     @Override
     public List<Producte> cercaPerNom(String nombre) {
-        int numRegistros = (int)(rutaProductos.length() / tamanoRegistro);
+        List<Producte> productos = new ArrayList<>();
 
-        try {
-            for (int i = 0; i < numRegistros; i++) {
-                Producte p = leerProducto(new RandomAccessFile(rutaProductos, "r"), i);
-                System.out.println(p);
+        // Le damos formato al nombre introducido
+        nombre = formatearNombre(nombre);
+
+        /*
+        Sabiendo el tamaño en bytes de cada registro, recorremos de nombre en nombre hasta que coincida, comenzando
+        desde la posición 4 (inicio del campo nombre de primer registro) y sumando el tamaño del registro en cada
+        iteración. En el momento que encontremos un nombre coincidente, llamaremos al metodo leerProducto() indicandole
+        la posición inicial del producto, en este caso la del nombre - 4. Debido a que el nombre es un campo con valores
+        que se pueden repetir, aunque encontremos coincidentes debemos iterar hata el final. Como la instancia de
+        RandomAccessFile está en el try-with-resources se cerrará de manera automática.
+         */
+        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            int posNombre = 4;
+            String nombreRegistro;
+
+            // Iteramos de código en código
+            for (int i = posNombre; i < raf.length(); i += tamanoRegistro) {
+                // Posicionar el pointer, recoger el código y comprobar si es el que buscamos
+                raf.seek(i);
+                nombreRegistro = raf.readUTF();
+
+                // Si encontramos el código coincidente, leemos el producto completo
+                if (nombreRegistro.equalsIgnoreCase(nombre)) {
+                    productos.add(leerProducto(raf, ((i - 4) / tamanoRegistro)));
+                }
             }
-
-        } catch (EOFException e) {
 
         } catch (IOException e) {
             System.err.println("Error! " + e.getMessage());
         }
 
-        return new ArrayList<>();
+        return productos;
     }
 
     @Override
@@ -179,22 +193,43 @@ public class GestioProducte implements Gestionable {
 
 
 
-    private Producte leerProducto(RandomAccessFile raf, int posicion) {
-        int codigo = raf.readInt();
+    private Producte leerProducto(RandomAccessFile raf, int posicion) throws IOException {
+        Producte p = null;
+        int codigo, stock;
+        String nombre;
+        double precio;
+        boolean descatalogado;
 
+        // Ubicamos el pointer en la posicion inicial del registro deseado y leemos todos los campos de registro
+        raf.seek(posicion * tamanoRegistro);
+        codigo = raf.readInt();
+        nombre = raf.readUTF();
+        precio = raf.readDouble();
+        stock = raf.readInt();
+        descatalogado = raf.readBoolean();
+
+        // Una vez recogidos todos los valores del producto, creamos una instancia Producte con esos valores
+        p = new Producte(codigo, nombre, precio, stock, descatalogado);
+
+        return p;
+    }
+
+    private void escribirProducto(RandomAccessFile raf, Producte p) throws IOException {
+        // Ubicamos el pointer en el final del fichero
+        raf.seek(rutaProductos.length());
+
+        // Escribimos todos los campos de producto
+        raf.writeInt(p.getCodigo());
+        raf.writeUTF(p.getNombre());
+        raf.writeDouble(p.getPrecio());
+        raf.writeInt(p.getStock());
+        raf.writeBoolean(p.isDescatalogado());
     }
 
     private void validarDatos(Producte p) throws ProducteNoValidException {
 
         // Nombre
-        String nombre = p.getNombre().toUpperCase();
-        StringBuilder nombreBuilder = new StringBuilder(nombre);
-        if (nombre.length() < 50) {
-            for (int i = nombre.length(); i < 50; i++) {
-                nombreBuilder.append(" ");
-            }
-        }
-        p.setNombre(nombreBuilder.toString());
+        p.setNombre(formatearNombre(p.getNombre()));
 
         // Precio
         if (p.getPrecio() < 0) {
@@ -205,6 +240,18 @@ public class GestioProducte implements Gestionable {
         if (p.getStock() < 0) {
             throw new ProducteNoValidException("Stock inferior a 0.");
         }
+    }
+
+    private String formatearNombre(String nombre) {
+        StringBuilder nombreBuilder = new StringBuilder(nombre.toUpperCase());
+
+        if (nombre.length() < 50) {
+            for (int i = nombre.length(); i < 50; i++) {
+                nombreBuilder.append(" ");
+            }
+        }
+
+        return nombreBuilder.toString();
     }
 
 }

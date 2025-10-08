@@ -2,6 +2,8 @@ package main;
 
 import model.Producte;
 import persistencia.GestioProducte;
+import persistencia.ProducteNoExistentException;
+import persistencia.ProducteNoValidException;
 
 import java.io.File;
 
@@ -13,18 +15,37 @@ public class Main {
                 new File("ficheros/sin-stock.bin"),
                 new File("ficheros/descatalogado.bin"));
 
-//        gp.leerFicheroCompleto();
+        // Probar afegirProducte()
+//        try {
+//            int codigo;
+//            codigo = gp.afegirProducte(new Producte("Producto1", 23.99, 100, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
+//
+//            codigo = gp.afegirProducte(new Producte("Producto1", 23.99, 100, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
+//
+//            codigo = gp.afegirProducte(new Producte("Producto2", 23.99, 100, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
+//
+//            codigo = gp.afegirProducte(new Producte("Producto3", -100, 100, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
+//
+//        } catch (ProducteNoValidException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
 
-        int codigo = gp.afegirProducte(new Producte("Producto1", 23.99, 100, false));
-        System.out.println(codigo);
+        // Probar cercaPerCodi()
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+////            System.out.println(gp.cercaPerCodi(-2));
+//            System.out.println(gp.cercaPerCodi(10));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
 
-        Producte p = gp.cercaPerCodi(1);
-        System.out.println(p);
-
-        gp.afegirProducte(new Producte("Producto2", 23.99, 100, false));
-        for (Producte producte : gp.cercaPerNom("producto1")) {
-            
-        }
-
+        // Probar cercaPerNom()
+//        for (Producte p : gp.cercaPerNom("producto1")) {
+//            System.out.println(p);
+//        }
     }
 }
