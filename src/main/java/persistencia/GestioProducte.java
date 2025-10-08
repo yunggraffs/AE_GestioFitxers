@@ -26,6 +26,11 @@ public class GestioProducte implements Gestionable {
     public int afegirProducte(Producte p) throws ProducteNoValidException {
         int codigoGenerado;
 
+        // Validar integridad del fichero productos.bin
+        if (!validarFichero(rutaProductos)) {
+            return -1;
+        }
+
         // Validar los datos del producto
         validarDatos(p);
 
@@ -134,13 +139,13 @@ public class GestioProducte implements Gestionable {
 
             // Iteramos de código en código
             for (int i = posNombre; i < raf.length(); i += tamanoRegistro) {
-                // Posicionar el pointer, recoger el código y comprobar si es el que buscamos
+                // Posicionar el pointer, recoger el nombre y comprobar si es el que buscamos
                 raf.seek(i);
                 nombreRegistro = raf.readUTF();
 
-                // Si encontramos el código coincidente, leemos el producto completo
+                // Si encontramos el nombre coincidente, leemos el producto completo
                 if (nombreRegistro.equalsIgnoreCase(nombre)) {
-                    productos.add(leerProducto(raf, ((i - 4) / tamanoRegistro)));
+                    productos.add(leerProducto(raf, ((i - posNombre) / tamanoRegistro)));
                 }
             }
 
@@ -153,22 +158,117 @@ public class GestioProducte implements Gestionable {
 
     @Override
     public List<Producte> cercaSenseStock() {
-        return List.of();
+        List<Producte> productos = new ArrayList<>();
+
+        /*
+        Sabiendo el tamaño en bytes de cada registro y que el campo Stock se registra justo antes del campo
+        Descatalogado, recorremos de Stock en Stock hasta que encontremos uno con Stock = 0, comenzando desde la
+        posición 64 (inicio del campo Stock de primer registro) y sumando el tamaño del registro en cada
+        iteración. En el momento que encontremos un Stock = 0, comprobaremos si está descatalogado. En caso de que NO lo
+        esté llamaremos al metodo leerProducto() indicandole la posición inicial del producto, en este caso la del
+        Stock - 64, añadiremos ese producto al List y continuaremos iterando. Como la instancia de RandomAccessFile
+        está en el try-with-resources se cerrará de manera automática.
+         */
+        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            int posStock = 64;
+            int stock;
+            boolean descatalogado;
+
+            // Iteramos de stock en stock
+            for (int i = posStock; i < raf.length(); i += tamanoRegistro) {
+                // Posicionar el pointer, recoger el stock y si está descatalogado
+                raf.seek(i);
+                stock = raf.readInt();
+                descatalogado = raf.readBoolean();
+
+                // En el caso en que se cumplan las condiciones, leeremos el producto y lo añadiremos al List
+                if (stock == 0 && !descatalogado) {
+                    productos.add(leerProducto(raf, ((i - posStock) / tamanoRegistro)));
+                }
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
+
+        return productos;
     }
 
     @Override
     public List<Producte> cercaDescatalogats() {
-        return List.of();
+        List<Producte> productos = new ArrayList<>();
+
+        /*
+        Sabiendo el tamaño en bytes de cada registro, recorremos de campo Descatalogado en campo Descatalogado hasta que
+        encontremos uno con Descatalogado = true, comenzando desde la posición 68 (inicio del campo Descatalogado del
+        primer registro) y sumando el tamaño del registro en cada iteración. En el momento que encontremos un
+        Descatalogado = true llamaremos al metodo leerProducto() indicandole la posición inicial del producto, en este
+        caso la del Descatalogado - 68, añadiremos ese producto al List y continuaremos iterando. Como la instancia de
+        RandomAccessFile está en el try-with-resources se cerrará de manera automática.
+         */
+        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            int posDescatalogado = 68;
+            boolean descatalogado;
+
+            // Iteramos de campo descatalogado en campo descatalogado
+            for (int i = posDescatalogado; i < raf.length(); i += tamanoRegistro) {
+                // Posicionar el pointer, recoger el campo descatalogadostock y si está descatalogado
+                raf.seek(i);
+                descatalogado = raf.readBoolean();
+
+                // En el caso en que esté descatalogado, leeremos el producto y lo añadiremos al List
+                if (descatalogado) {
+                    productos.add(leerProducto(raf, ((i - posDescatalogado) / tamanoRegistro)));
+                }
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
+
+        return productos;
     }
 
     @Override
     public void exportarSenseStock() {
+        // Validar integridad del fichero sin-stock.bin
+        if (!validarFichero(rutaSinStock)) {
+            return;
+        }
 
+        // Obtener todos los productos registrados con Stock = 0 y Descatalogado = false
+        List<Producte> productos = cercaSenseStock();
+
+        // Escribir todos los productos obtenidos en el fichero sin-stock.txt
+        try (PrintWriter pw = new PrintWriter(rutaSinStock)) {
+            for (Producte p : productos) {
+                pw.printf("%d;%s;%.2f;%d;%b\n",
+                        p.getCodigo(), p.getNombre().strip(), p.getPrecio(), p.getStock(), p.isDescatalogado());
+            }
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
     }
 
     @Override
     public void exportarDescatalogats() {
+        // Validar integridad del fichero descatalogado.txt
+        if (!validarFichero(rutaDescatalogado)) {
+            return;
+        }
 
+        // Obtener todos los productos registrados con Descatalogado = true
+        List<Producte> productos = cercaDescatalogats();
+
+        // Escribir todos los productos obtenidos en el fichero descatalogado.txt
+        try (PrintWriter pw = new PrintWriter(rutaDescatalogado)) {
+            for (Producte p : productos) {
+                pw.printf("%d;%s;%.2f;%d;%b\n",
+                        p.getCodigo(), p.getNombre().strip(), p.getPrecio(), p.getStock(), p.isDescatalogado());
+            }
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
     }
 
     @Override
@@ -252,6 +352,22 @@ public class GestioProducte implements Gestionable {
         }
 
         return nombreBuilder.toString();
+    }
+
+    private boolean validarFichero(File fichero) {
+        boolean ficheroValidado = true;
+
+        // Validar directorio
+        File rutaFichero = new File(fichero.getPath().substring(0, fichero.getPath().lastIndexOf("\\")));
+        try {
+            rutaFichero.mkdirs();
+            fichero.createNewFile();
+        } catch (IOException e) {
+            System.err.printf("Error al crear el fichero %s: %s\n", fichero.getName(), e.getMessage());
+            ficheroValidado = false;
+        }
+
+        return ficheroValidado;
     }
 
 }
