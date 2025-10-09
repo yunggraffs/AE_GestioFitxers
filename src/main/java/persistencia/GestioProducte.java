@@ -4,7 +4,9 @@ import model.Producte;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GestioProducte implements Gestionable {
 
@@ -12,13 +14,15 @@ public class GestioProducte implements Gestionable {
     private final File RUTA_PRODUCTOS;
     private final File RUTA_SIN_STOCK;
     private final File RUTA_DESCATALOGADO;
+    private final File RUTA_TEMP;
     private final int TAMANO_REGISTRO = 69;
 
     // Constructor
-    public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado) {
+    public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado, File rutaTemp) {
         this.RUTA_PRODUCTOS = rutaProductos;
         this.RUTA_SIN_STOCK = rutaSinStock;
         this.RUTA_DESCATALOGADO = rutaDescatalogado;
+        this.RUTA_TEMP = rutaTemp;
     }
 
     @Override
@@ -392,7 +396,59 @@ public class GestioProducte implements Gestionable {
 
     @Override
     public void esborrarDescatalogats() {
+        // Primero creamos un fichero temporal donde guardaremos todos los productos sin descatalogar
+        validarFichero(RUTA_TEMP);
 
+        /*
+        Aprovecharemos que el metodo cercaDescatalogats() nos devuelve un List con todos los descatalogados, para
+        conocer sus códigos iteraremos sobre todos esos productos guardando el valor de su código en un HashSet para
+        poder comprobar de manera rápida y eficiente si un código concreto está en la lista de descatalogados. De
+        esta manera, iteraremos de código en código del fichero productos, y en caso de que el HashSet no contenga
+        ese código lo añadiremos al fichero temporal.
+         */
+        try (RandomAccessFile rafTemp = new RandomAccessFile(RUTA_TEMP, "rw");
+            RandomAccessFile rafProd = new RandomAccessFile(RUTA_PRODUCTOS, "r")) {
+            List<Producte> descatalogados = cercaDescatalogats();
+
+            // Hacemos el HashSet de códigos
+            Set<Integer> codigosDesc = new HashSet<>();
+            for (Producte p : descatalogados) {
+                codigosDesc.add(p.getCodigo());
+            }
+
+            // Buscamos todos los productos NO descatalogados
+            int codigo;
+            long numProductos = rafProd.length() / 69;
+            for (int i = 0; i / 69 < numProductos; i += 69) {
+                rafProd.seek(i);
+                codigo = rafProd.readInt();
+
+                // Si NO está descatalogado, lo leemos entero y lo escribimos en el fichero temporal
+                if (!codigosDesc.contains(codigo)) {
+                    Producte p = new Producte(
+                            codigo,
+                            rafProd.readUTF(),
+                            rafProd.readDouble(),
+                            rafProd.readInt(),
+                            rafProd.readBoolean()
+                    );
+                    escribirProducto(rafTemp, p, rafTemp.length());
+                    // Devolvemos el pointer a la posicion inicial del producto
+                    rafProd.seek(i);
+                }
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
+
+        /*
+        Una vez escritos todos los productos NO descatalogados en el fichero temporal, eliminaremos el fichero
+        productos.bin y renombraremos el temporal con ese nombre. De esta manera conseguiremos un fichero productos.bin
+        que contendrá todos los productos excepto los descatalogados.
+         */
+        RUTA_PRODUCTOS.delete();
+        RUTA_TEMP.renameTo(RUTA_PRODUCTOS);
     }
 
 
