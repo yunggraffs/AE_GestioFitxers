@@ -21,11 +21,11 @@ public class Main {
             codigo = gp.afegirProducte(new Producte("Producto1", 23.99, 100, false));
             System.out.printf("Código retornado: %d\n", codigo);
 
-            codigo = gp.afegirProducte(new Producte("Producto2", 23.99, 0, false));
-            System.out.printf("Código retornado: %d\n", codigo);
-
-            codigo = gp.afegirProducte(new Producte("Producto3", 23.99, 0, false));
-            System.out.printf("Código retornado: %d\n", codigo);
+//            codigo = gp.afegirProducte(new Producte("Producto2", 23.99, 0, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
+//
+//            codigo = gp.afegirProducte(new Producte("Producto3", 2, 0, false));
+//            System.out.printf("Código retornado: %d\n", codigo);
 
         } catch (ProducteNoValidException e) {
             System.err.println("Error! " + e.getMessage());
@@ -59,6 +59,57 @@ public class Main {
 //        gp.exportarSenseStock();
 
         // Probar exportarDescatalogados()
-        gp.exportarDescatalogats();
+//        gp.exportarDescatalogats();
+
+        // Probar modificarProducte()
+//        System.out.println("Antes de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
+//
+//        gp.modificarProducte(new Producte(1,"Producto1(modificado)", 100000, 0, true));
+//
+//        System.out.println("Después de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
+
+        // Probar modificarStock()
+//        System.out.println("Antes de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
+//
+//        gp.modificarStock(1, 200, false);
+//
+//        System.out.println("Después de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
+
+        // Probar descatalogarProducte()
+//        System.out.println("Antes de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
+//
+//        gp.descatalogarProducte(1);
+//
+//        System.out.println("Después de modificar producto:");
+//        try {
+//            System.out.println(gp.cercaPerCodi(1));
+//        } catch (ProducteNoValidException | ProducteNoExistentException e) {
+//            System.err.println("Error! " + e.getMessage());
+//        }
     }
 }

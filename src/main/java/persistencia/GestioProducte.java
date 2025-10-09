@@ -5,21 +5,20 @@ import model.Producte;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GestioProducte implements Gestionable {
 
     // Atributos
-    private final File rutaProductos;
-    private final File rutaSinStock;
-    private final File rutaDescatalogado;
-    private final int tamanoRegistro = 69;
+    private final File RUTA_PRODUCTOS;
+    private final File RUTA_SIN_STOCK;
+    private final File RUTA_DESCATALOGADO;
+    private final int TAMANO_REGISTRO = 69;
 
     // Constructor
     public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado) {
-        this.rutaProductos = rutaProductos;
-        this.rutaSinStock = rutaSinStock;
-        this.rutaDescatalogado = rutaDescatalogado;
+        this.RUTA_PRODUCTOS = rutaProductos;
+        this.RUTA_SIN_STOCK = rutaSinStock;
+        this.RUTA_DESCATALOGADO = rutaDescatalogado;
     }
 
     @Override
@@ -27,40 +26,34 @@ public class GestioProducte implements Gestionable {
         int codigoGenerado;
 
         // Validar integridad del fichero productos.bin
-        if (!validarFichero(rutaProductos)) {
+        if (!validarFichero(RUTA_PRODUCTOS)) {
             return -1;
         }
 
         // Validar los datos del producto
         validarDatos(p);
 
-        // Generar código para el producto cogiendo el último código + 1
-        int totalRegistros = (int) (rutaProductos.length() / tamanoRegistro);
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "rw")) {
+            // Generar código para el producto cogiendo el último código + 1
+            int totalRegistros = (int) (RUTA_PRODUCTOS.length() / TAMANO_REGISTRO);
 
-        // En caso de que el total de registros sea 0 se asigna directamente el código 1
-        if (totalRegistros == 0) {
-            codigoGenerado = 1;
+            // En caso de que el total de registros sea 0 se asigna directamente el código 1
+            if (totalRegistros == 0) {
+                codigoGenerado = 1;
 
-        } else {
-            try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+            } else {
                 Producte ultimoRegistro = leerProducto(raf, totalRegistros - 1);
                 codigoGenerado = ultimoRegistro.getCodigo() + 1;
-
-            } catch (IOException e) {
-                System.err.println("Error! " + e.getMessage());
-                return -1;
             }
-        }
 
-        // Añadir el nuevo producto a productos.bin
-        p.setCodigo(codigoGenerado);
-        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "rw")){
-            escribirProducto(raf, p);
+            // Añadir el nuevo producto a productos.bin
+            p.setCodigo(codigoGenerado);
+            escribirProducto(raf, p, raf.length());
             System.out.printf("[%d] %s añadido correctamente.\n", p.getCodigo(), p.getNombre().strip());
 
         } catch (FileNotFoundException e) {
             System.err.println("Error! No se ha podido encontrar el archivo \"" +
-                    rutaProductos.getPath() + "\".");
+                    RUTA_PRODUCTOS.getPath() + "\".");
             return -1;
 
         } catch (IOException e) {
@@ -88,19 +81,19 @@ public class GestioProducte implements Gestionable {
         hacemos un break para dejar de iterar. Como la instancia de RandomAccessFile está en el try-with-resources se
         cerrará de manera automática.
          */
-        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "r")) {
             int posCodigo = 0;
             int codigoRegistro;
 
             // Iteramos de código en código
-            for (int i = posCodigo; i <= raf.length(); i += tamanoRegistro) {
+            for (int i = posCodigo; i <= raf.length(); i += TAMANO_REGISTRO) {
                 // Posicionar el pointer, recoger el código y comprobar si es el que buscamos
                 raf.seek(i);
                 codigoRegistro = raf.readInt();
 
                 // Si encontramos el código coincidente, leemos el producto completo
                 if (codigoRegistro == codigo) {
-                    p = leerProducto(raf, (i / tamanoRegistro));
+                    p = leerProducto(raf, (i / TAMANO_REGISTRO));
                     break;
                 }
             }
@@ -133,19 +126,19 @@ public class GestioProducte implements Gestionable {
         que se pueden repetir, aunque encontremos coincidentes debemos iterar hata el final. Como la instancia de
         RandomAccessFile está en el try-with-resources se cerrará de manera automática.
          */
-        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "r")) {
             int posNombre = 4;
             String nombreRegistro;
 
             // Iteramos de código en código
-            for (int i = posNombre; i < raf.length(); i += tamanoRegistro) {
+            for (int i = posNombre; i < raf.length(); i += TAMANO_REGISTRO) {
                 // Posicionar el pointer, recoger el nombre y comprobar si es el que buscamos
                 raf.seek(i);
                 nombreRegistro = raf.readUTF();
 
                 // Si encontramos el nombre coincidente, leemos el producto completo
                 if (nombreRegistro.equalsIgnoreCase(nombre)) {
-                    productos.add(leerProducto(raf, ((i - posNombre) / tamanoRegistro)));
+                    productos.add(leerProducto(raf, ((i - posNombre) / TAMANO_REGISTRO)));
                 }
             }
 
@@ -169,13 +162,13 @@ public class GestioProducte implements Gestionable {
         Stock - 64, añadiremos ese producto al List y continuaremos iterando. Como la instancia de RandomAccessFile
         está en el try-with-resources se cerrará de manera automática.
          */
-        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "r")) {
             int posStock = 64;
             int stock;
             boolean descatalogado;
 
             // Iteramos de stock en stock
-            for (int i = posStock; i < raf.length(); i += tamanoRegistro) {
+            for (int i = posStock; i < raf.length(); i += TAMANO_REGISTRO) {
                 // Posicionar el pointer, recoger el stock y si está descatalogado
                 raf.seek(i);
                 stock = raf.readInt();
@@ -183,7 +176,7 @@ public class GestioProducte implements Gestionable {
 
                 // En el caso en que se cumplan las condiciones, leeremos el producto y lo añadiremos al List
                 if (stock == 0 && !descatalogado) {
-                    productos.add(leerProducto(raf, ((i - posStock) / tamanoRegistro)));
+                    productos.add(leerProducto(raf, ((i - posStock) / TAMANO_REGISTRO)));
                 }
             }
 
@@ -206,19 +199,19 @@ public class GestioProducte implements Gestionable {
         caso la del Descatalogado - 68, añadiremos ese producto al List y continuaremos iterando. Como la instancia de
         RandomAccessFile está en el try-with-resources se cerrará de manera automática.
          */
-        try (RandomAccessFile raf = new RandomAccessFile(rutaProductos, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "r")) {
             int posDescatalogado = 68;
             boolean descatalogado;
 
             // Iteramos de campo descatalogado en campo descatalogado
-            for (int i = posDescatalogado; i < raf.length(); i += tamanoRegistro) {
+            for (int i = posDescatalogado; i < raf.length(); i += TAMANO_REGISTRO) {
                 // Posicionar el pointer, recoger el campo descatalogadostock y si está descatalogado
                 raf.seek(i);
                 descatalogado = raf.readBoolean();
 
                 // En el caso en que esté descatalogado, leeremos el producto y lo añadiremos al List
                 if (descatalogado) {
-                    productos.add(leerProducto(raf, ((i - posDescatalogado) / tamanoRegistro)));
+                    productos.add(leerProducto(raf, ((i - posDescatalogado) / TAMANO_REGISTRO)));
                 }
             }
 
@@ -232,7 +225,7 @@ public class GestioProducte implements Gestionable {
     @Override
     public void exportarSenseStock() {
         // Validar integridad del fichero sin-stock.bin
-        if (!validarFichero(rutaSinStock)) {
+        if (!validarFichero(RUTA_SIN_STOCK)) {
             return;
         }
 
@@ -240,7 +233,7 @@ public class GestioProducte implements Gestionable {
         List<Producte> productos = cercaSenseStock();
 
         // Escribir todos los productos obtenidos en el fichero sin-stock.txt
-        try (PrintWriter pw = new PrintWriter(rutaSinStock)) {
+        try (PrintWriter pw = new PrintWriter(RUTA_SIN_STOCK)) {
             for (Producte p : productos) {
                 pw.printf("%d;%s;%.2f;%d;%b\n",
                         p.getCodigo(), p.getNombre().strip(), p.getPrecio(), p.getStock(), p.isDescatalogado());
@@ -253,7 +246,7 @@ public class GestioProducte implements Gestionable {
     @Override
     public void exportarDescatalogats() {
         // Validar integridad del fichero descatalogado.txt
-        if (!validarFichero(rutaDescatalogado)) {
+        if (!validarFichero(RUTA_DESCATALOGADO)) {
             return;
         }
 
@@ -261,7 +254,7 @@ public class GestioProducte implements Gestionable {
         List<Producte> productos = cercaDescatalogats();
 
         // Escribir todos los productos obtenidos en el fichero descatalogado.txt
-        try (PrintWriter pw = new PrintWriter(rutaDescatalogado)) {
+        try (PrintWriter pw = new PrintWriter(RUTA_DESCATALOGADO)) {
             for (Producte p : productos) {
                 pw.printf("%d;%s;%.2f;%d;%b\n",
                         p.getCodigo(), p.getNombre().strip(), p.getPrecio(), p.getStock(), p.isDescatalogado());
@@ -273,17 +266,128 @@ public class GestioProducte implements Gestionable {
 
     @Override
     public void modificarProducte(Producte p) throws ProducteNoValidException, ProducteNoExistentException {
+        // Validamos el producto recibido
+        validarDatos(p);
+
+        // Debido a que el campo Código es único lo utilizaremos para encontrar el producto a modificar
+        long posicion = -1L;
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "rw")) {
+            /*
+             Buscamos la posición del producto a modificar, comenzando desde el byte 0 (codigo del registro 1) iterando
+             de TAMANO_REGISTRO en TAMANO_REGISTRO.
+             */
+            for (int i = 0; i <= raf.length(); i += TAMANO_REGISTRO) {
+                if (raf.readInt() == p.getCodigo()) {
+                    posicion = i;
+                    break;
+                }
+            }
+
+            if (posicion == -1L) {
+                throw new ProducteNoExistentException(
+                        "No existe ningún producto registrado con el código \'" + p.getCodigo() + "\'.");
+            }
+
+            // Una vez localizado el registro del Producto a modificar lo sobreescribimos con los nuevos valores
+            escribirProducto(raf, p, posicion);
+
+        // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (FileNotFoundException e) {
+            System.err.println("Error! No se ha podido encontrar el archivo \"" +
+                    RUTA_PRODUCTOS.getPath() + "\".");
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
 
     }
 
     @Override
     public void modificarStock(int codigo, int cantidad, boolean incrementar) throws ProducteNoExistentException, StockNoValidException {
+        // Debido a que el campo Código es único lo utilizaremos para encontrar el producto a modificar
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "rw")) {
+            long posicionStock = -1L;
+            int stock = 0;
 
+            /*
+             Buscamos la posición del producto a modificar, comenzando desde el byte 0 (codigo del registro 1) iterando
+             de TAMANO_REGISTRO en TAMANO_REGISTRO.
+             */
+            for (int i = 0; i <= raf.length(); i += TAMANO_REGISTRO) {
+                if (raf.readInt() == codigo) {
+                    posicionStock = i + 64;
+                    raf.seek(posicionStock);
+                    stock = raf.readInt();
+                    break;
+                }
+            }
+
+            if (posicionStock == -1L) {
+                throw new ProducteNoExistentException(
+                        "No existe ningún producto registrado con el código \'" + codigo + "\'.");
+            }
+
+            // Validar el nuevo valor de Stock
+            if (cantidad < 0) {
+                throw new StockNoValidException("El valor a incrementar/decrementar tiene que > 0.");
+            } else if (!incrementar && stock - cantidad < 0) {
+                throw new StockNoValidException("El nuevo valor de Stock no es válido.");
+            }
+
+            // Calcular el nuevo stock
+            if (incrementar) {
+                stock += cantidad;
+            } else {
+                stock -= cantidad;
+            }
+
+            // Modificar el stock del producto
+            raf.seek(posicionStock);
+            raf.writeInt(stock);
+
+        // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (FileNotFoundException e) {
+            System.err.println("Error! No se ha podido encontrar el archivo \"" +
+                    RUTA_PRODUCTOS.getPath() + "\".");
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
     }
 
     @Override
     public void descatalogarProducte(int codigo) throws ProducteNoExistentException {
+        // Debido a que el campo Código es único lo utilizaremos para encontrar el producto a modificar
+        long posicion = -1L;
+        try (RandomAccessFile raf = new RandomAccessFile(RUTA_PRODUCTOS, "rw")) {
+            /*
+             Buscamos la posición del producto a modificar, comenzando desde el byte 0 (codigo del registro 1) iterando
+             de TAMANO_REGISTRO en TAMANO_REGISTRO.
+             */
+            for (int i = 0; i <= raf.length(); i += TAMANO_REGISTRO) {
+                if (raf.readInt() == codigo) {
+                    posicion = i;
+                    break;
+                }
+            }
 
+            if (posicion == -1L) {
+                throw new ProducteNoExistentException(
+                        "No existe ningún producto registrado con el código \'" + codigo + "\'.");
+            }
+
+            // Una vez localizado el registro del Producto a modificar, cambiaremos su valor de Descatalogado
+            raf.seek(posicion + 68);
+            raf.writeBoolean(true);
+
+            // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (FileNotFoundException e) {
+            System.err.println("Error! No se ha podido encontrar el archivo \"" +
+                    RUTA_PRODUCTOS.getPath() + "\".");
+
+        } catch (IOException e) {
+            System.err.println("Error! " + e.getMessage());
+        }
     }
 
     @Override
@@ -301,7 +405,7 @@ public class GestioProducte implements Gestionable {
         boolean descatalogado;
 
         // Ubicamos el pointer en la posicion inicial del registro deseado y leemos todos los campos de registro
-        raf.seek(posicion * tamanoRegistro);
+        raf.seek(posicion * TAMANO_REGISTRO);
         codigo = raf.readInt();
         nombre = raf.readUTF();
         precio = raf.readDouble();
@@ -314,9 +418,9 @@ public class GestioProducte implements Gestionable {
         return p;
     }
 
-    private void escribirProducto(RandomAccessFile raf, Producte p) throws IOException {
+    private void escribirProducto(RandomAccessFile raf, Producte p, long posicion) throws IOException {
         // Ubicamos el pointer en el final del fichero
-        raf.seek(rutaProductos.length());
+        raf.seek(posicion);
 
         // Escribimos todos los campos de producto
         raf.writeInt(p.getCodigo());
