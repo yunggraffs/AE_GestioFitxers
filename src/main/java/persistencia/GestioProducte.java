@@ -14,15 +14,14 @@ public class GestioProducte implements Gestionable {
     private final File RUTA_PRODUCTOS;
     private final File RUTA_SIN_STOCK;
     private final File RUTA_DESCATALOGADO;
-    private final File RUTA_TEMP;
+    private final File RUTA_TEMP = new File("temp/productos-temp.bin");
     private final int TAMANO_REGISTRO = 69;
 
     // Constructor
-    public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado, File rutaTemp) {
+    public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado) {
         this.RUTA_PRODUCTOS = rutaProductos;
         this.RUTA_SIN_STOCK = rutaSinStock;
         this.RUTA_DESCATALOGADO = rutaDescatalogado;
-        this.RUTA_TEMP = rutaTemp;
     }
 
     @Override
@@ -107,6 +106,9 @@ public class GestioProducte implements Gestionable {
             throw new ProducteNoExistentException(
                     "No existe ningún producto registrado con el código \'" + codigo + "\'.");
 
+        } catch (FileNotFoundException e) {
+            System.err.println("Error! No se ha podido encontrar el archivo " + RUTA_PRODUCTOS);
+            
         } catch (IOException e) {
             System.err.println("Error! " + e.getMessage());
             return p;
@@ -287,15 +289,13 @@ public class GestioProducte implements Gestionable {
                 }
             }
 
-            if (posicion == -1L) {
-                throw new ProducteNoExistentException(
-                        "No existe ningún producto registrado con el código \'" + p.getCodigo() + "\'.");
-            }
-
             // Una vez localizado el registro del Producto a modificar lo sobreescribimos con los nuevos valores
             escribirProducto(raf, p, posicion);
 
         // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (EOFException e) {
+            throw new ProducteNoExistentException(
+                        "No existe ningún producto registrado con el código \'" + p.getCodigo() + "\'.");
         } catch (FileNotFoundException e) {
             System.err.println("Error! No se ha podido encontrar el archivo \"" +
                     RUTA_PRODUCTOS.getPath() + "\".");
@@ -326,11 +326,6 @@ public class GestioProducte implements Gestionable {
                 }
             }
 
-            if (posicionStock == -1L) {
-                throw new ProducteNoExistentException(
-                        "No existe ningún producto registrado con el código \'" + codigo + "\'.");
-            }
-
             // Validar el nuevo valor de Stock
             if (cantidad < 0) {
                 throw new StockNoValidException("El valor a incrementar/decrementar tiene que > 0.");
@@ -350,6 +345,9 @@ public class GestioProducte implements Gestionable {
             raf.writeInt(stock);
 
         // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (EOFException e) {
+            throw new ProducteNoExistentException(
+                        "No existe ningún producto registrado con el código \'" + codigo + "\'.");
         } catch (FileNotFoundException e) {
             System.err.println("Error! No se ha podido encontrar el archivo \"" +
                     RUTA_PRODUCTOS.getPath() + "\".");
@@ -375,16 +373,14 @@ public class GestioProducte implements Gestionable {
                 }
             }
 
-            if (posicion == -1L) {
-                throw new ProducteNoExistentException(
-                        "No existe ningún producto registrado con el código \'" + codigo + "\'.");
-            }
-
             // Una vez localizado el registro del Producto a modificar, cambiaremos su valor de Descatalogado
             raf.seek(posicion + 68);
             raf.writeBoolean(true);
 
             // En caso de capturar EOFException significará que no existe ningún producto con ese código registrado
+        } catch (EOFException e) {
+            throw new ProducteNoExistentException(
+                                "No existe ningún producto registrado con el código \'" + codigo + "\'.");
         } catch (FileNotFoundException e) {
             System.err.println("Error! No se ha podido encontrar el archivo \"" +
                     RUTA_PRODUCTOS.getPath() + "\".");

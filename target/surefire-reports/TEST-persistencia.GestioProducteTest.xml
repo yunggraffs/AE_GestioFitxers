@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="persistencia.GestioProducteTest" time="0.176" tests="21" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers\target\test-classes;D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers\target\classes;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\mrg16\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\mrg16\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="user.timezone" value="Europe/Madrid"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="user.country" value="ES"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.boot.library.path" value="D:\jdks\jdk-21.0.8+9\bin"/>
+    <property name="sun.java.command" value="C:\Users\mrg16\AppData\Local\Temp\surefire17158082876701824078\surefirebooter-20251009111358363_3.jar C:\Users\mrg16\AppData\Local\Temp\surefire17158082876701824078 2025-10-09T11-13-58_290-jvmRun1 surefire-20251009111358363_1tmp surefire_0-20251009111358363_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="persistencia.GestioProducteTest"/>
+    <property name="surefire.test.class.path" value="D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers\target\test-classes;D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers\target\classes;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\mrg16\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\mrg16\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\mrg16\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\mrg16"/>
+    <property name="user.language" value="es"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2025-07-15"/>
+    <property name="java.home" value="D:\jdks\jdk-21.0.8+9"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\mrg16\AppData\Local\Temp\surefire17158082876701824078\surefirebooter-20251009111358363_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21.0.8+9-LTS"/>
+    <property name="user.name" value="mrg16"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-21.0.8+9"/>
+    <property name="maven.ext.class.path" value="D:\.Archivos de programa\NetBeans-22\netbeans\java\maven-nblib\netbeans-eventspy.jar"/>
+    <property name="localRepository" value="C:\Users\mrg16\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="C:\Users\mrg16\AppData\Local\Temp\"/>
+    <property name="java.version" value="21.0.8"/>
+    <property name="user.dir" value="D:\Proyectos\Java\dam2\Accés a dades\AE_GestioFitxers"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="D:\jdks\jdk-21.0.8+9\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\WireGuard\;D:\.Archivos de programa\Git\cmd;C:\Users\mrg16\AppData\Local\Microsoft\WindowsApps;C:\Users\mrg16\.jdks\ms-21.0.8\bin;D:\jdks\jdk-21.0.8+9\bin;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="21.0.8+9-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testModificarStock" classname="persistencia.GestioProducteTest" time="0.061">
+    <system-out><![CDATA[[1] PRODUCTOSTOCK añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testAfegirProductePreuNegatiu" classname="persistencia.GestioProducteTest" time="0.004"/>
+  <testcase name="testCercaPerNom" classname="persistencia.GestioProducteTest" time="0.006">
+    <system-out><![CDATA[[1] MOUSE añadido correctamente.
+[2] MOUSE añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testModificarProducteNoExistent" classname="persistencia.GestioProducteTest" time="0.006"/>
+  <testcase name="testCercaPerCodi" classname="persistencia.GestioProducteTest" time="0.007">
+    <system-out><![CDATA[[1] PRODUCTO2 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testDescatalogarProducte" classname="persistencia.GestioProducteTest" time="0.004">
+    <system-out><![CDATA[[1] PRODUCTODESC añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testEsborrarDescatalogats" classname="persistencia.GestioProducteTest" time="0.015">
+    <system-out><![CDATA[[1] PRODUCTOACTIVO añadido correctamente.
+[2] PRODUCTODESC añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testModificarProductePreuNegativo" classname="persistencia.GestioProducteTest" time="0.002">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testModificarStockNegativo" classname="persistencia.GestioProducteTest" time="0.004">
+    <system-out><![CDATA[[1] PRODUCTOSTOCK añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testCercaDescatalogats" classname="persistencia.GestioProducteTest" time="0.004">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+[2] PROD2 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testModificarProducteStockNegativo" classname="persistencia.GestioProducteTest" time="0.002">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testDescatalogarProducteNoExistent" classname="persistencia.GestioProducteTest" time="0.002"/>
+  <testcase name="testModificarStockNoExistent" classname="persistencia.GestioProducteTest" time="0.002"/>
+  <testcase name="testCercaSenseStock" classname="persistencia.GestioProducteTest" time="0.005">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+[2] PROD2 añadido correctamente.
+[3] PROD3 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testCercaPerCodiNoExistent" classname="persistencia.GestioProducteTest" time="0.002"/>
+  <testcase name="testCercaPerCodiNegatiu" classname="persistencia.GestioProducteTest" time="0.001"/>
+  <testcase name="testAfegirProducte" classname="persistencia.GestioProducteTest" time="0.002">
+    <system-out><![CDATA[[1] PRODUCTO1 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testExportarSenseStock" classname="persistencia.GestioProducteTest" time="0.004">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testExportarDescatalogats" classname="persistencia.GestioProducteTest" time="0.004">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+]]></system-out>
+  </testcase>
+  <testcase name="testAfegirProducteStockNegatiu" classname="persistencia.GestioProducteTest" time="0.002"/>
+  <testcase name="testModificarProducte" classname="persistencia.GestioProducteTest" time="0.003">
+    <system-out><![CDATA[[1] PROD1 añadido correctamente.
+]]></system-out>
+  </testcase>
+</testsuite>

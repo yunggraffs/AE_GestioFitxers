@@ -13,8 +13,8 @@ public class Main {
         GestioProducte gp = new GestioProducte(
                 new File("ficheros/productos.bin"),
                 new File("ficheros/sin-stock.txt"),
-                new File("ficheros/descatalogado.txt"),
-                new File("ficheros/productos-temp.bin"));
+                new File("ficheros/descatalogado.txt")
+        );
 
         // Probar afegirProducte()
         try {
