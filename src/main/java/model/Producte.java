@@ -2,19 +2,40 @@ package model;
 
 import java.util.Objects;
 
+/**
+ * Clase que representa un producto con sus propiedades principales:
+ * código, nombre, precio, stock y estado (descatalogado o no).
+ * <p>
+ * Cada producto se almacena como un registro de 69 bytes en un fichero binario.
+ * </p>
+ */
 public class Producte {
 
-    // Atributos
-    private int codigo = -1;                // 4 bytes
-    private String nombre;                  // 52 bytes (2 bytes + (1 byte * carácter))
-    private double precio;                  // 8 bytes
-    private int stock;                      // 4 bytes
-    private boolean descatalogado = false;  // 1 byte
-    // En total, un registro ocupa 69 bytes
+    /** Código único del producto. */
+    private int codigo = -1;
+    /** Nombre del producto (máximo 50 caracteres). */
+    private String nombre;
+    /** Precio del producto. */
+    private double precio;
+    /** Unidades disponibles en stock. */
+    private int stock;
+    /** Indica si el producto está descatalogado. */
+    private boolean descatalogado = false;
 
-    // Constructores
+    /**
+     * Constructor vacío.
+     * Permite crear un producto sin inicializar sus atributos.
+     */
     public Producte() {}
 
+    /**
+     * Constructor que crea un producto sin código (se genera posteriormente).
+     *
+     * @param nombre        nombre del producto.
+     * @param precio        precio del producto.
+     * @param stock         cantidad disponible.
+     * @param descatalogado estado de descatalogación.
+     */
     public Producte(String nombre, double precio, int stock, boolean descatalogado) {
         this.nombre = nombre;
         this.precio = precio;
@@ -22,6 +43,15 @@ public class Producte {
         this.descatalogado = descatalogado;
     }
 
+    /**
+     * Constructor completo (con código asignado).
+     *
+     * @param codigo        código único del producto.
+     * @param nombre        nombre del producto.
+     * @param precio        precio del producto.
+     * @param stock         cantidad disponible.
+     * @param descatalogado estado de descatalogación.
+     */
     public Producte(int codigo, String nombre, double precio, int stock, boolean descatalogado) {
         this.codigo = codigo;
         this.nombre = nombre;
@@ -30,48 +60,38 @@ public class Producte {
         this.descatalogado = descatalogado;
     }
 
-    // Getters y Setters
-    public int getCodigo() {
-        return codigo;
-    }
 
-    public boolean isDescatalogado() {
-        return descatalogado;
-    }
+    // ---------------- Getters y Setters ----------------
 
-    public String getNombre() {
-        return nombre;
-    }
+    /** @return código del producto. */
+    public int getCodigo() { return codigo; }
 
-    public double getPrecio() {
-        return precio;
-    }
+    /** @return true si el producto está descatalogado. */
+    public boolean isDescatalogado() { return descatalogado; }
 
-    public int getStock() {
-        return stock;
-    }
+    /** @return nombre del producto. */
+    public String getNombre() { return nombre; }
 
-    public void setCodigo(int codigo) {
-        this.codigo = codigo;
-    }
+    /** @return precio del producto. */
+    public double getPrecio() { return precio; }
 
-    public void setDescatalogado(boolean descatalogado) {
-        this.descatalogado = descatalogado;
-    }
+    /** @return unidades en stock. */
+    public int getStock() { return stock; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    /** @param codigo nuevo código del producto. */
+    public void setCodigo(int codigo) { this.codigo = codigo; }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
-    }
+    /** @param nombre nuevo nombre del producto. */
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
+    // ---------------- Métodos de utilidad ----------------
 
-    // Hashcode y Equals
+    /**
+     * Compara productos según su código.
+     *
+     * @param o objeto a comparar.
+     * @return {@code true} si los códigos son iguales.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -79,12 +99,13 @@ public class Producte {
         return codigo == producto.codigo;
     }
 
+    /** @return hash basado en el código del producto. */
     @Override
     public int hashCode() {
         return Objects.hashCode(codigo);
     }
 
-    // ToString
+    /** @return representación textual legible del producto. */
     @Override
     public String toString() {
         return "Producto{" +

@@ -6,31 +6,31 @@ import java.util.List;
 
 public interface Gestionable {
 
-    public int afegirProducte(Producte p) throws ProducteNoValidException;
+    int afegirProducte(Producte p) throws ProducteNoValidException;
 
-    public Producte cercaPerCodi(int codigo)
+    Producte cercaPerCodi(int codigo)
             throws ProducteNoValidException, ProducteNoExistentException;
 
-    public List<Producte> cercaPerNom(String nombre);
+    List<Producte> cercaPerNom(String nombre);
 
-    public List<Producte> cercaSenseStock();
+    List<Producte> cercaSenseStock();
 
-    public List<Producte> cercaDescatalogats();
+    List<Producte> cercaDescatalogats();
 
-    public void exportarSenseStock();
+    void exportarSenseStock();
 
-    public void exportarDescatalogats();
+    void exportarDescatalogats();
 
-    public void modificarProducte(Producte p)
+    void modificarProducte(Producte p)
             throws ProducteNoValidException, ProducteNoExistentException;
 
-    public void modificarStock(
+    void modificarStock(
             int codigo, int cantidad, boolean incrementar)
             throws ProducteNoExistentException, StockNoValidException;
 
-    public void descatalogarProducte(int codigo)
+    void descatalogarProducte(int codigo)
             throws ProducteNoExistentException;
 
-    public void esborrarDescatalogats();
+    void esborrarDescatalogats();
 
 }

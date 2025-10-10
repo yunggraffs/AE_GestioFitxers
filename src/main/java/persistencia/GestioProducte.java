@@ -8,22 +8,48 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Clase que gestiona el almacenamiento, modificación, exportación y búsqueda de productos
+ * en ficheros binarios y de texto. Implementa la interfaz {@link Gestionable}.
+ * <p>
+ * Cada producto se guarda en un fichero binario con registros de longitud fija (69 bytes).
+ * La clase utiliza {@link RandomAccessFile} para realizar operaciones de lectura y escritura directa.
+ * </p>
+ */
 public class GestioProducte implements Gestionable {
 
-    // Atributos
+    /** Ruta del fichero principal de productos (binario). */
     private final File RUTA_PRODUCTOS;
+    /** Ruta del fichero de exportación de productos sin stock. */
     private final File RUTA_SIN_STOCK;
+    /** Ruta del fichero de exportación de productos descatalogados. */
     private final File RUTA_DESCATALOGADO;
+    /** Ruta del fichero temporal utilizado para eliminar descatalogados. */
     private final File RUTA_TEMP = new File("temp/productos-temp.bin");
+    /** Tamaño fijo en bytes de cada registro de producto. */
     private final int TAMANO_REGISTRO = 69;
 
-    // Constructor
+    /**
+     * Constructor principal.
+     *
+     * @param rutaProductos     fichero donde se almacenan los productos.
+     * @param rutaSinStock      fichero de exportación de productos sin stock.
+     * @param rutaDescatalogado fichero de exportación de productos descatalogados.
+     */
     public GestioProducte (File rutaProductos, File rutaSinStock, File rutaDescatalogado) {
         this.RUTA_PRODUCTOS = rutaProductos;
         this.RUTA_SIN_STOCK = rutaSinStock;
         this.RUTA_DESCATALOGADO = rutaDescatalogado;
     }
 
+    /**
+     * Añade un nuevo producto al fichero binario de productos.
+     * Genera automáticamente el código del producto (último código + 1).
+     *
+     * @param p producto a añadir.
+     * @return código generado del nuevo producto o -1 si ocurre un error.
+     * @throws ProducteNoValidException si los datos del producto son inválidos.
+     */
     @Override
     public int afegirProducte(Producte p) throws ProducteNoValidException {
         int codigoGenerado;
@@ -67,6 +93,14 @@ public class GestioProducte implements Gestionable {
         return codigoGenerado;
     }
 
+    /**
+     * Busca un producto por su código en el fichero binario.
+     *
+     * @param codigo código único del producto.
+     * @return producto encontrado o {@code null} si no existe.
+     * @throws ProducteNoValidException    si el código es menor que 1.
+     * @throws ProducteNoExistentException si no existe un producto con ese código.
+     */
     @Override
     public Producte cercaPerCodi(int codigo) throws ProducteNoValidException, ProducteNoExistentException {
         Producte p = null;
@@ -117,6 +151,12 @@ public class GestioProducte implements Gestionable {
         return p;
     }
 
+    /**
+     * Busca todos los productos cuyo nombre coincide con el indicado (ignorando mayúsculas/minúsculas).
+     *
+     * @param nombre nombre del producto a buscar.
+     * @return lista de productos con ese nombre.
+     */
     @Override
     public List<Producte> cercaPerNom(String nombre) {
         List<Producte> productos = new ArrayList<>();
@@ -155,6 +195,11 @@ public class GestioProducte implements Gestionable {
         return productos;
     }
 
+    /**
+     * Devuelve una lista de productos que no tienen stock y no están descatalogados.
+     *
+     * @return lista de productos sin stock.
+     */
     @Override
     public List<Producte> cercaSenseStock() {
         List<Producte> productos = new ArrayList<>();
@@ -193,6 +238,11 @@ public class GestioProducte implements Gestionable {
         return productos;
     }
 
+    /**
+     * Devuelve una lista de productos descatalogados.
+     *
+     * @return lista de productos descatalogados.
+     */
     @Override
     public List<Producte> cercaDescatalogats() {
         List<Producte> productos = new ArrayList<>();
@@ -228,6 +278,10 @@ public class GestioProducte implements Gestionable {
         return productos;
     }
 
+    /**
+     * Exporta a un fichero de texto todos los productos sin stock.
+     * Cada línea contiene los campos separados por punto y coma.
+     */
     @Override
     public void exportarSenseStock() {
         // Validar integridad del fichero sin-stock.bin
@@ -249,6 +303,10 @@ public class GestioProducte implements Gestionable {
         }
     }
 
+    /**
+     * Exporta a un fichero de texto todos los productos descatalogados.
+     * Cada línea contiene los campos separados por punto y coma.
+     */
     @Override
     public void exportarDescatalogats() {
         // Validar integridad del fichero descatalogado.txt
@@ -270,6 +328,13 @@ public class GestioProducte implements Gestionable {
         }
     }
 
+    /**
+     * Modifica un producto existente en el fichero binario.
+     *
+     * @param p producto con los nuevos valores.
+     * @throws ProducteNoValidException    si los datos son inválidos.
+     * @throws ProducteNoExistentException si el producto no existe.
+     */
     @Override
     public void modificarProducte(Producte p) throws ProducteNoValidException, ProducteNoExistentException {
         // Validamos el producto recibido
@@ -306,6 +371,15 @@ public class GestioProducte implements Gestionable {
 
     }
 
+    /**
+     * Modifica el stock de un producto, sumando o restando una cantidad.
+     *
+     * @param codigo      código del producto.
+     * @param cantidad    cantidad a modificar (> 0).
+     * @param incrementar true para sumar stock, false para restar.
+     * @throws ProducteNoExistentException si no existe el producto.
+     * @throws StockNoValidException       si la cantidad es inválida o el stock resultante sería negativo.
+     */
     @Override
     public void modificarStock(int codigo, int cantidad, boolean incrementar) throws ProducteNoExistentException, StockNoValidException {
         // Debido a que el campo Código es único lo utilizaremos para encontrar el producto a modificar
@@ -357,6 +431,12 @@ public class GestioProducte implements Gestionable {
         }
     }
 
+    /**
+     * Marca un producto como descatalogado.
+     *
+     * @param codigo código del producto a descatalogar.
+     * @throws ProducteNoExistentException si el producto no existe.
+     */
     @Override
     public void descatalogarProducte(int codigo) throws ProducteNoExistentException {
         // Debido a que el campo Código es único lo utilizaremos para encontrar el producto a modificar
@@ -390,6 +470,10 @@ public class GestioProducte implements Gestionable {
         }
     }
 
+    /**
+     * Elimina físicamente todos los productos descatalogados del fichero principal.
+     * Crea un fichero temporal con los productos activos y reemplaza el original.
+     */
     @Override
     public void esborrarDescatalogats() {
         // Primero creamos un fichero temporal donde guardaremos todos los productos sin descatalogar
@@ -447,8 +531,18 @@ public class GestioProducte implements Gestionable {
         RUTA_TEMP.renameTo(RUTA_PRODUCTOS);
     }
 
+    // ------------------------------------------------------------------------
+    // MÉTODOS PRIVADOS AUXILIARES
+    // ------------------------------------------------------------------------
 
-
+    /**
+     * Lee un producto completo desde una posición concreta del fichero.
+     *
+     * @param raf       acceso aleatorio al fichero.
+     * @param posicion  posición (en número de registro).
+     * @return objeto {@link Producte} leído.
+     * @throws IOException si ocurre un error de lectura.
+     */
     private Producte leerProducto(RandomAccessFile raf, int posicion) throws IOException {
         Producte p = null;
         int codigo, stock;
@@ -470,6 +564,14 @@ public class GestioProducte implements Gestionable {
         return p;
     }
 
+    /**
+     * Escribe un producto completo en el fichero binario en la posición indicada.
+     *
+     * @param raf       acceso aleatorio al fichero.
+     * @param p         producto a escribir.
+     * @param posicion  posición (en bytes) donde escribir.
+     * @throws IOException si ocurre un error de escritura.
+     */
     private void escribirProducto(RandomAccessFile raf, Producte p, long posicion) throws IOException {
         // Ubicamos el pointer en el final del fichero
         raf.seek(posicion);
@@ -482,6 +584,12 @@ public class GestioProducte implements Gestionable {
         raf.writeBoolean(p.isDescatalogado());
     }
 
+    /**
+     * Valida los datos de un producto (nombre, precio y stock).
+     *
+     * @param p producto a validar.
+     * @throws ProducteNoValidException si algún campo no cumple las restricciones.
+     */
     private void validarDatos(Producte p) throws ProducteNoValidException {
 
         // Nombre
@@ -498,6 +606,12 @@ public class GestioProducte implements Gestionable {
         }
     }
 
+    /**
+     * Formatea el nombre del producto a mayúsculas y lo rellena con espacios hasta 50 caracteres.
+     *
+     * @param nombre nombre original.
+     * @return nombre formateado y completado.
+     */
     private String formatearNombre(String nombre) {
         StringBuilder nombreBuilder = new StringBuilder(nombre.toUpperCase());
 
@@ -510,6 +624,12 @@ public class GestioProducte implements Gestionable {
         return nombreBuilder.toString();
     }
 
+    /**
+     * Comprueba la existencia e integridad de un fichero. Si no existe, lo crea junto a su directorio.
+     *
+     * @param fichero fichero a validar.
+     * @return {@code true} si se ha validado correctamente, {@code false} si ocurre un error.
+     */
     private boolean validarFichero(File fichero) {
         boolean ficheroValidado = true;
 
